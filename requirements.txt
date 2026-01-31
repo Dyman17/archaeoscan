@@ -17,3 +17,4 @@ passlib[bcrypt]==1.7.4
 httpx==0.25.2
 requests==2.31.0
 nest-asyncio==1.5.8
+gradio==4.44.0
