@@ -57,7 +57,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // WebSocket connection
-  const { status: wsStatus, connect: connectWebSocket, disconnect: disconnectWebSocket, lastMessage } = useWebSocket({
+  const { status: wsStatus, connect: connectWebSocket, disconnect: disconnectWebSocket } = useWebSocket({
     url: settings.websocketUrl,
     onConnect: () => {
       setConnectionStatus('connected');
