@@ -7,10 +7,11 @@ import { AppProvider } from "@/context/AppContext";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Dashboard } from "@/pages/Dashboard";
 import { Sensors } from "@/pages/Sensors";
-import { Radar } from "@/pages/Radar";
 import { MapView } from "@/pages/MapView";
 import { Materials } from "@/pages/Materials";
 import { CameraStream } from "@/pages/CameraStream";
+import { AIAnalysis } from "@/pages/AIAnalysis";
+import { Artifacts } from "@/pages/Artifacts";
 import { Settings } from '@/pages/Settings';
 
 import NotFound from './pages/NotFound';
@@ -28,10 +29,11 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/sensors" element={<Sensors />} />
-              <Route path="/radar" element={<Radar />} />
               <Route path="/map" element={<MapView />} />
               <Route path="/materials" element={<Materials />} />
               <Route path="/camera" element={<CameraStream />} />
+              <Route path="/ai" element={<AIAnalysis />} />
+              <Route path="/artifacts" element={<Artifacts />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

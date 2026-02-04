@@ -3,10 +3,11 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Radio, 
-  Radar, 
   Map, 
   Layers, 
   Video, 
+  Brain,
+  Database,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -30,11 +31,11 @@ interface SidebarProps {
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/' },
   { id: 'sensors', label: 'Sensors', icon: Radio, path: '/sensors' },
-  { id: 'radar', label: 'Radar', icon: Radar, path: '/radar' },
   { id: 'map', label: 'Map', icon: Map, path: '/map' },
   { id: 'materials', label: 'Materials', icon: Layers, path: '/materials' },
   { id: 'camera', label: 'Camera Stream', icon: Video, path: '/camera' },
-
+  { id: 'ai', label: 'AI Analysis', icon: Brain, path: '/ai' },
+  { id: 'artifacts', label: 'Artifacts DB', icon: Database, path: '/artifacts' },
   { id: 'settings', label: 'Settings', icon: Settings, path: '/settings' },
 ];
 

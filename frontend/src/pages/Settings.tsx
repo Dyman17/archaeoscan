@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,55 +20,95 @@ import {
   Save,
   AlertTriangle,
   FileText,
-  Table
+  Table,
+  Activity,
+  CheckCircle
 } from 'lucide-react';
 
 export function Settings() {
   const { settings, updateSettings, connectionStatus } = useApp();
+  const [config, setConfig] = useState({
+    esp_camera_ip: '192.168.1.45',
+    esp_data_ip: '192.168.1.46',
+    server_ws: 'wss://web-production-263d0.up.railway.app/ws',
+    esp32Ip: '192.168.1.45'
+  });
+  const [pingResults, setPingResults] = useState<Record<string, { status: string, latency?: number }>>({});
+  const [testing, setTesting] = useState<string | null>(null);
   
-  // Load settings from backend on component mount
+  // Load config from backend on component mount
   React.useEffect(() => {
-    const loadSettings = async () => {
+    const loadConfig = async () => {
       try {
-        const response = await fetch('/api/settings/config');
+        const response = await fetch('/api/config');
         if (response.ok) {
-          const backendSettings = await response.json();
+          const backendConfig = await response.json();
+          setConfig(backendConfig);
           // Update local settings with backend values
-          updateSettings(backendSettings);
+          updateSettings({
+            websocketUrl: backendConfig.server_ws,
+            esp32Ip: backendConfig.esp_camera_ip
+          });
         }
       } catch (error) {
-        console.error('Failed to load settings from backend:', error);
+        console.error('Failed to load config from backend:', error);
       }
     };
     
-    loadSettings();
+    loadConfig();
   }, [updateSettings]);
 
   const handleSave = async () => {
     try {
-      const response = await fetch('/api/settings/config', {
+      const response = await fetch('/api/config', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          websocketUrl: settings.websocketUrl,
-          esp32Ip: settings.esp32Ip,
-          units: settings.units
-        })
+        body: JSON.stringify(config)
       });
       
       if (response.ok) {
-        console.log('Settings saved successfully');
-        // Show success message
-        alert('Settings saved successfully!');
+        console.log('Config saved successfully');
+        alert('Configuration saved successfully!');
+        // Update local settings
+        updateSettings({
+          websocketUrl: config.server_ws,
+          esp32Ip: config.esp_camera_ip
+        });
       } else {
-        console.error('Failed to save settings');
-        alert('Failed to save settings');
+        console.error('Failed to save config');
+        alert('Failed to save configuration');
       }
     } catch (error) {
-      console.error('Error saving settings:', error);
-      alert('Error saving settings');
+      console.error('Error saving config:', error);
+      alert('Error saving configuration');
+    }
+  };
+
+  const handlePing = async (target: string) => {
+    setTesting(target);
+    try {
+      const response = await fetch(`/api/ping/${target}`);
+      if (response.ok) {
+        const result = await response.json();
+        setPingResults(prev => ({
+          ...prev,
+          [target]: result
+        }));
+      } else {
+        setPingResults(prev => ({
+          ...prev,
+          [target]: { status: 'error' }
+        }));
+      }
+    } catch (error) {
+      setPingResults(prev => ({
+        ...prev,
+        [target]: { status: 'error' }
+      }));
+    } finally {
+      setTesting(null);
     }
   };
 
@@ -195,37 +235,147 @@ export function Settings() {
       <div className="data-card">
         <div className="flex items-center gap-2 mb-6">
           <Wifi className="h-5 w-5 text-primary" />
-          <h2 className="font-semibold text-lg">Connection</h2>
+          <h2 className="font-semibold text-lg">Connection Configuration</h2>
         </div>
 
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="websocket-url">WebSocket Server URL</Label>
-              <Input
-                id="websocket-url"
-                value={settings.websocketUrl}
-                onChange={(e) => updateSettings({ websocketUrl: e.target.value })}
-                placeholder="ws://localhost:8080"
-                className="font-mono"
-              />
+              <Label htmlFor="esp-camera-ip">ESP32-CAM IP Address</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="esp-camera-ip"
+                  value={config.esp_camera_ip}
+                  onChange={(e) => setConfig(prev => ({ ...prev, esp_camera_ip: e.target.value }))}
+                  placeholder="192.168.1.45"
+                  className="font-mono"
+                />
+                <Button 
+                  variant="outline" 
+                  onClick={() => handlePing('esp-camera')}
+                  disabled={testing === 'esp-camera'}
+                >
+                  {testing === 'esp-camera' ? (
+                    <RotateCcw className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Activity className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
               <p className="text-xs text-muted-foreground">
-                Backend WebSocket endpoint for real-time data
+                IP address of ESP32 camera module
               </p>
+              {pingResults['esp-camera'] && (
+                <div className="text-xs">
+                  <span className={`inline-flex items-center gap-1 px-2 py-1 rounded ${
+                    pingResults['esp-camera'].status === 'ok' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {pingResults['esp-camera'].status === 'ok' ? (
+                      <CheckCircle className="h-3 w-3" />
+                    ) : (
+                      <AlertTriangle className="h-3 w-3" />
+                    )}
+                    {pingResults['esp-camera'].status === 'ok' 
+                      ? `Connected (${pingResults['esp-camera'].latency}ms)` 
+                      : 'Connection failed'
+                    }
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="esp32-ip">ESP32-CAM IP Address</Label>
-              <Input
-                id="esp32-ip"
-                value={settings.esp32Ip}
-                onChange={(e) => updateSettings({ esp32Ip: e.target.value })}
-                placeholder="192.168.1.100"
-                className="font-mono"
-              />
+              <Label htmlFor="esp-data-ip">ESP32 Data IP Address</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="esp-data-ip"
+                  value={config.esp_data_ip}
+                  onChange={(e) => setConfig(prev => ({ ...prev, esp_data_ip: e.target.value }))}
+                  placeholder="192.168.1.46"
+                  className="font-mono"
+                />
+                <Button 
+                  variant="outline" 
+                  onClick={() => handlePing('esp-data')}
+                  disabled={testing === 'esp-data'}
+                >
+                  {testing === 'esp-data' ? (
+                    <RotateCcw className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Activity className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
               <p className="text-xs text-muted-foreground">
-                IP address of your ESP32-CAM device
+                IP address of ESP32 sensor data module
               </p>
+              {pingResults['esp-data'] && (
+                <div className="text-xs">
+                  <span className={`inline-flex items-center gap-1 px-2 py-1 rounded ${
+                    pingResults['esp-data'].status === 'ok' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {pingResults['esp-data'].status === 'ok' ? (
+                      <CheckCircle className="h-3 w-3" />
+                    ) : (
+                      <AlertTriangle className="h-3 w-3" />
+                    )}
+                    {pingResults['esp-data'].status === 'ok' 
+                      ? `Connected (${pingResults['esp-data'].latency}ms)` 
+                      : 'Connection failed'
+                    }
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="server-ws">WebSocket Server URL</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="server-ws"
+                  value={config.server_ws}
+                  onChange={(e) => setConfig(prev => ({ ...prev, server_ws: e.target.value }))}
+                  placeholder="wss://your-server.railway.app/ws"
+                  className="font-mono"
+                />
+                <Button 
+                  variant="outline" 
+                  onClick={() => handlePing('server')}
+                  disabled={testing === 'server'}
+                >
+                  {testing === 'server' ? (
+                    <RotateCcw className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Activity className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Backend WebSocket endpoint for real-time data
+              </p>
+              {pingResults['server'] && (
+                <div className="text-xs">
+                  <span className={`inline-flex items-center gap-1 px-2 py-1 rounded ${
+                    pingResults['server'].status === 'ok' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {pingResults['server'].status === 'ok' ? (
+                      <CheckCircle className="h-3 w-3" />
+                    ) : (
+                      <AlertTriangle className="h-3 w-3" />
+                    )}
+                    {pingResults['server'].status === 'ok' 
+                      ? `Connected (${pingResults['server'].latency}ms)` 
+                      : 'Connection failed'
+                    }
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
