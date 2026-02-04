@@ -2,6 +2,7 @@ from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import asyncio
+import os
 from contextlib import asynccontextmanager
 import threading
 import time
