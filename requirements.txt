@@ -19,4 +19,3 @@ requests==2.31.0
 nest-asyncio==1.5.8
 gradio==4.44.0
 psycopg2-binary==2.9.9
-aiohttp==3.9.1

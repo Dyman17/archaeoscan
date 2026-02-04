@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
 import asyncio
-import aiohttp
+import httpx
 import time
 
 router = APIRouter()
@@ -68,18 +68,18 @@ async def ping_target(target: str):
     try:
         if target == "esp-camera":
             # Ping ESP32 camera
-            async with aiohttp.ClientSession() as session:
-                async with session.get(f"http://{config_data['esp_camera_ip']}/status", timeout=aiohttp.ClientTimeout(total=5)) as response:
-                    if response.status == 200:
-                        latency = int((time.time() - start_time) * 1000)
-                        return {"status": "ok", "latency": latency}
+            async with httpx.AsyncClient() as client:
+                response = await client.get(f"http://{config_data['esp_camera_ip']}/status", timeout=5.0)
+                if response.status_code == 200:
+                    latency = int((time.time() - start_time) * 1000)
+                    return {"status": "ok", "latency": latency}
         elif target == "esp-data":
             # Ping ESP32 data module
-            async with aiohttp.ClientSession() as session:
-                async with session.get(f"http://{config_data['esp_data_ip']}/status", timeout=aiohttp.ClientTimeout(total=5)) as response:
-                    if response.status == 200:
-                        latency = int((time.time() - start_time) * 1000)
-                        return {"status": "ok", "latency": latency}
+            async with httpx.AsyncClient() as client:
+                response = await client.get(f"http://{config_data['esp_data_ip']}/status", timeout=5.0)
+                if response.status_code == 200:
+                    latency = int((time.time() - start_time) * 1000)
+                    return {"status": "ok", "latency": latency}
         elif target == "server":
             # Ping self (server)
             latency = int((time.time() - start_time) * 1000)
@@ -87,7 +87,7 @@ async def ping_target(target: str):
         else:
             raise HTTPException(status_code=400, detail="Invalid target. Use: esp-camera, esp-data, or server")
             
-    except asyncio.TimeoutError:
+    except httpx.TimeoutException:
         return {"status": "timeout"}
     except Exception as e:
         return {"status": "error"}
