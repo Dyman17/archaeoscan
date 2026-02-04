@@ -11,6 +11,10 @@ from datetime import datetime, timedelta
 from app.routers import sensors, materials, radar, camera, system, control, settings
 from app.routers.preservation import router as preservation_router
 from app.routers.advanced_features import router as advanced_features_router
+from app.routers.api_config import router as api_config_router
+from app.routers.ai_analysis import router as ai_analysis_router
+from app.routers.artifacts import router as artifacts_router
+from app.routers.esp32_data import router as esp32_data_router
 from app.websocket import manager, simulate_sensor_stream
 from routers.services.notifications_service import notifications_service
 from app.db import init_db
@@ -72,6 +76,10 @@ app.include_router(control.router, prefix="/api", tags=["control"])
 app.include_router(settings.router, prefix="/api", tags=["settings"])
 app.include_router(preservation_router, prefix="/api", tags=["preservation"])
 app.include_router(advanced_features_router, prefix="/api", tags=["advanced"])
+app.include_router(api_config_router, prefix="/api", tags=["config"])
+app.include_router(ai_analysis_router, prefix="/api/ai", tags=["ai"])
+app.include_router(artifacts_router, prefix="/api", tags=["artifacts"])
+app.include_router(esp32_data_router, prefix="/api/esp32", tags=["esp32"])
 
 @app.get("/")
 async def root():
