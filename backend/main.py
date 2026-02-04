@@ -16,12 +16,12 @@ from app.routers.ai_analysis import router as ai_analysis_router
 from app.routers.artifacts import router as artifacts_router
 from app.routers.esp32_data import router as esp32_data_router
 from app.websocket import manager, simulate_sensor_stream
-from routers.services.notifications_service import notifications_service
+from app.services.notifications_service import notifications_service
 from app.db import init_db
 
 def start_periodic_data_save():
     """Background task to periodically save sensor data to database every 5 minutes"""
-    from routers.services.preservation_service import preservation_service
+    from app.services.preservation_service import preservation_service
     print("Starting periodic data saving task...")
     
     def periodic_save():
