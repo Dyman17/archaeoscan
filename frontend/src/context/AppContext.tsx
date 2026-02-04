@@ -30,7 +30,7 @@ interface AppContextType {
 }
 
 const defaultSettings: AppSettings = {
-  websocketUrl: 'wss://archaeoscan-backend.hf.space/ws',
+  websocketUrl: 'ws://localhost:8000/ws',
   updateFrequency: 1000,
   theme: 'dark',
   units: 'metric',
