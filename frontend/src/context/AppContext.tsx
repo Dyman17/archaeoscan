@@ -30,7 +30,7 @@ interface AppContextType {
 }
 
 const defaultSettings: AppSettings = {
-  websocketUrl: 'wss://web-production-263d0.up.railway.app/ws',
+  websocketUrl: 'wss://archaeoscan-backend.hf.space/ws',
   updateFrequency: 1000,
   theme: 'dark',
   units: 'metric',
