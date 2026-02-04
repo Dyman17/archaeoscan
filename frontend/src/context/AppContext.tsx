@@ -30,7 +30,7 @@ interface AppContextType {
 }
 
 const defaultSettings: AppSettings = {
-  websocketUrl: 'ws://172.20.10.2:8000/ws',
+  websocketUrl: 'wss://dyman17-archaeoscan.hf.space/ws',
   updateFrequency: 1000,
   theme: 'dark',
   units: 'metric',
@@ -62,7 +62,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     onConnect: () => {
       setConnectionStatus('connected');
     },
-    onDisconnect: () => {
+    onDisconnect: () => {                   
       setConnectionStatus('disconnected');
     },
     onMessage: (data) => {

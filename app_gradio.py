@@ -70,9 +70,9 @@ def create_interface():
                 - HC-SR04T (ultrasonic)
                 - ESP32-CAM
                 
-                ## 🚀 Deployment
-                - **Frontend**: Vercel/Netlify/GitHub Pages
-                - **Backend**: Railway/Render/Heroku
+                ## 🚀 Local Development
+                - **Frontend**: Run `npm run dev` in frontend directory
+                - **Backend**: Run `python main.py` in backend directory
                 - **Sensors**: ESP32 with custom firmware
                 """)
         
